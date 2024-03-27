@@ -1,9 +1,12 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React, {useState, useEffect} from 'react';
+import { StyleSheet, Text, View, FlatList, TouchableOpacity, Alert } from 'react-native';
+import Firebase from '../../Firebase';
+import {MaterialCommunityIcons} from '@expo/vector-icons';
 
 export default function Home({navigation}) {
 
-  const [diario, setDiario] = userState([]);
+  const [diario, setDiario] = useState([]);
 
   function deleteDiario(id){
 
@@ -12,8 +15,8 @@ export default function Home({navigation}) {
     Alert.alert("O diario foi Deletado.");
   }
 
-  useInsertionEffect(()=>{
-    fireabase.collection("diario").onSnapshot((query)=>{
+  useEffect(()=>{
+    Firebase.collection("diario").onSnapshot((query)=>{
       const lista=[];
       query.forEach((doc)=> {
         lista.push({...doc.data(),id: doc.id});
@@ -24,13 +27,53 @@ export default function Home({navigation}) {
 
   return (
     <View style={styles.container}>
-      <View style={styles.titulo}><Text style={styles.tx}>Meu Diário</Text></View>
-      <View style={styles.bloco}>
-      <Text style={styles.txt}>Data: 11/03/2024</Text>
-      <Text style={styles.tx}>Palavra: Codar</Text>
-      <Text style={styles.txt}>Meus Códigos são horríveis!!</Text>
-      <StatusBar style="auto" />
+      <View >
+        <Text style={styles.txt}>Lista de Dias</Text>
       </View>
+
+      <FlatList 
+        data={diario}
+        renderItem={({item})=>{
+          return(
+            <View style={estilo.diario}>
+
+              <TouchableOpacity onPress={()=>navigation.navigate("AlterarDiario",{
+                id: item.id,
+                titulo: item.titulo,
+                texto: item.texto,
+                data: item.data,
+                local: item.local
+              })}>
+
+                <View style={estilo.itens}>
+                  <Text style={estilo.titulo}>Título 
+                      <Text style={estilo.texto}>{item.titulo}</Text>
+                  </Text>
+
+                  <Text style={estilo.titulo}>Texto 
+                      <Text style={estilo.texto}>{item.texto}</Text>
+                  </Text>
+
+                  <Text style={estilo.titulo}>data
+                      <Text style={estilo.texto}>{item.data}</Text>
+                  </Text>
+
+                </View>
+              </TouchableOpacity>
+
+              <View style={estilo.botaodeletar}>
+                <TouchableOpacity onPress={()=>{deletatexto(item.id)}}>
+                  <MaterialCommunityIcons name="delete-ciclo-outline" size={70} color="green"/>
+
+                </TouchableOpacity>
+              </View> 
+
+            </View>
+          );
+        }}
+      />
+
+      <StatusBar style="auto" />
     </View>
   );
 }
